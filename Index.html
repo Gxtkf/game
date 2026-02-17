@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<title>Крестики-нолики — Масленица</title>
+<style>
+    body {
+        margin: 0;
+        font-family: "Trebuchet MS", sans-serif;
+        text-align: center;
+        background: linear-gradient(to bottom, #ffcc33, #ff9966);
+        color: #5a2d0c;
+    }
+
+    h1 {
+        margin-top: 20px;
+        font-size: 32px;
+        text-shadow: 2px 2px 4px #fff3cd;
+    }
+
+    p {
+        font-size: 18px;
+    }
+
+    #board {
+        display: grid;
+        grid-template-columns: repeat(3, 140px);
+        grid-template-rows: repeat(3, 140px);
+        gap: 10px;
+        justify-content: center;
+        margin: 30px auto;
+    }
+
+    .cell {
+        background: radial-gradient(circle, #fff3cd, #ffcc66);
+        border: 3px solid #cc6600;
+        border-radius: 15px;
+        font-size: 16px;
+        font-weight: bold;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        position: relative;
+        padding: 5px;
+        transition: transform 0.2s;
+    }
+
+    .cell:hover {
+        transform: scale(1.05);
+    }
+
+    .icon {
+        font-size: 30px;
+    }
+
+    .word {
+        margin-top: 5px;
+    }
+
+    .mark {
+        position: absolute;
+        font-size: 60px;
+        color: red;
+        top: 35%;
+    }
+
+    #status {
+        font-size: 20px;
+        margin-bottom: 10px;
+    }
+
+    button {
+        padding: 10px 20px;
+        font-size: 16px;
+        background-color: #cc6600;
+        color: white;
+        border: none;
+        border-radius: 8px;
+        cursor: pointer;
+        margin-bottom: 20px;
+    }
+
+    button:hover {
+        background-color: #a64d00;
+    }
+</style>
+</head>
+<body>
+
+<h1>☀️ Крестики-нолики: Масленица 🥞</h1>
+<p>Прочитай слово, вспомни его значение и сделай ход!</p>
+
+<div id="board"></div>
+
+<div id="status">Ход игрока: X</div>
+<button onclick="resetGame()">Начать заново</button>
+
+<script>
+const cellsData = [
+    { word: "Блины", icon: "🥞" },
+    { word: "Самовар", icon: "🫖" },
+    { word: "Чучело", icon: "🔥" },
+    { word: "Сани", icon: "🛷" },
+    { word: "Зима", icon: "❄️" },
+    { word: "Весна", icon: "🌸" },
+    { word: "Ярмарка", icon: "🎪" },
+    { word: "Гулянье", icon: "🎶" },
+    { word: "Праздник", icon: "🎉" }
+];
+
+let currentPlayer = "X";
+let boardState = Array(9).fill(null);
+
+const board = document.getElementById("board");
+const statusText = document.getElementById("status");
+
+function createBoard() {
+    board.innerHTML = "";
+    cellsData.forEach((item, index) => {
+        const cell = document.createElement("div");
+        cell.classList.add("cell");
+        cell.dataset.index = index;
+
+        cell.innerHTML = `
+            <div class="icon">${item.icon}</div>
+            <div class="word">${item.word}</div>
+        `;
+
+        cell.addEventListener("click", handleClick);
+        board.appendChild(cell);
+    });
+}
+
+function handleClick(e) {
+    const cell = e.currentTarget;
+    const index = cell.dataset.index;
+
+    if (boardState[index] !== null) return;
+
+    boardState[index] = currentPlayer;
+
+    const mark = document.createElement("div");
+    mark.classList.add("mark");
+    mark.textContent = currentPlayer;
+    cell.appendChild(mark);
+
+    if (checkWinner()) {
+        statusText.textContent = "Победил игрок: " + currentPlayer + " 🎉";
+        disableBoard();
+        return;
+    }
+
+    if (!boardState.includes(null)) {
+        statusText.textContent = "Ничья! 🤝";
+        return;
+    }
+
+    currentPlayer = currentPlayer === "X" ? "O" : "X";
+    statusText.textContent = "Ход игрока: " + currentPlayer;
+}
+
+function checkWinner() {
+    const winCombos = [
+        [0,1,2],[3,4,5],[6,7,8],
+        [0,3,6],[1,4,7],[2,5,8],
+        [0,4,8],[2,4,6]
+    ];
+
+    return winCombos.some(combo => 
+        combo.every(i => boardState[i] === currentPlayer)
+    );
+}
+
+function disableBoard() {
+    document.querySelectorAll(".cell").forEach(cell =>
+        cell.removeEventListener("click", handleClick)
+    );
+}
+
+function resetGame() {
+    boardState = Array(9).fill(null);
+    currentPlayer = "X";
+    statusText.textContent = "Ход игрока: X";
+    createBoard();
+}
+
+createBoard();
+</script>
+
+</body>
+</html>
